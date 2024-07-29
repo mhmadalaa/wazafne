@@ -101,7 +101,7 @@ exports.confirmSignup = catchAsync(async (req, res, next) => {
 
   /*
   based on user role employer or employee
-  take the user data, validate it, add role_id in user entitiy
+  take the user data, validate it, add profile_id in user entitiy
   */
   if (user?.role === 'employer') {
     const employer = await Employer.create({
@@ -112,7 +112,7 @@ exports.confirmSignup = catchAsync(async (req, res, next) => {
     });
 
     if (employer) {
-      user.role_id = employer._id;
+      user.profile_id = employer._id;
     } else {
       return res.status(406).json({
         status: 'error',
@@ -133,7 +133,7 @@ exports.confirmSignup = catchAsync(async (req, res, next) => {
     });
 
     if (employee) {
-      user.role_id = employee._id;
+      user.profile_id = employee._id;
     } else {
       return res.status(406).json({
         status: 'error',

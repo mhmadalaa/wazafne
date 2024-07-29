@@ -45,7 +45,7 @@ const userSchema = new mongoose.Schema({
     enum: ['employer', 'employee'],
     required: true,
   },
-  role_id: {
+  profile_id: {
     type: mongoose.Schema.ObjectId,
     // required: true,
   },
