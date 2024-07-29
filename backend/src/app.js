@@ -1,10 +1,12 @@
 const express = require('express');
 const morgan = require('morgan');
 
+const authRouter = require('./routers/authRoute');
+
 const app = express();
 
 // BACKGROUND TASKS
-// require('./background_tasks/');
+require('./background_tasks/nonVerifiedUsers');
 
 // to accept json data in requests
 app.use(express.json());
@@ -20,8 +22,7 @@ app.use(
 );
 
 // APP ROUTERS
-// app.use('/document', documentRouter);
-// app.use('/book', bookRouter);
+app.use('/auth', authRouter);
 
 // NOT FOUND ROUTERS ERROR HANDLER
 app.use((err, req, res, next) => {
