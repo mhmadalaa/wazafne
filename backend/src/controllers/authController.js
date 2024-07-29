@@ -46,7 +46,7 @@ const sendEmailWithOtp = async (user, otp, res, email) => {
   }
 };
 
-// user ask for singup with email and password
+// user ask for singup with email, password, and either employer or employee
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     email: req.body.email,
