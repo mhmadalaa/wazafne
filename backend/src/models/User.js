@@ -5,12 +5,6 @@ const hashOtp = require('../utils/hashOtp');
 const otpGenerator = require('otp-generator');
 
 const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'User must have a name'],
-    minlength: [2, 'User name must be at least 2 characters'],
-    maxlength: [15, 'User name must be at most 15 characters'],
-  },
   email: {
     type: String,
     required: [true, 'Please provide your email'],
@@ -54,7 +48,7 @@ const userSchema = new mongoose.Schema({
   role_id: {
     type: mongoose.Schema.ObjectId,
     enum: ['employer', 'employee'],
-    required: true,
+    // required: true,
   },
   createdAt: Date,
 });
@@ -94,7 +88,7 @@ userSchema.methods.createOtp = function () {
 
   this.otp = hashOtp(Otp);
 
-  this.otpExpires = Date.now() + 5 * 60 * 1000;
+  this.otpExpires = Date.now() + 30 * 60 * 1000;
 
   return Otp;
 };
