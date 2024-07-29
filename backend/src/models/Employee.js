@@ -53,6 +53,7 @@ const employeeSchema = new mongoose.Schema({
     },
   ],
   experience_level: {
+    type: String,
     enum: ['Junior', 'Mid', 'Senior'],
     required: true,
   },
