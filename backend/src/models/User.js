@@ -33,7 +33,6 @@ const userSchema = new mongoose.Schema({
   },
   passwordChangedAt: {
     type: Date,
-    required: true,
   },
   otp: String,
   otpExpires: Date,
@@ -43,11 +42,11 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
+    enum: ['employer', 'employee'],
     required: true,
   },
   role_id: {
     type: mongoose.Schema.ObjectId,
-    enum: ['employer', 'employee'],
     // required: true,
   },
   createdAt: Date,

@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 
 router.post('/signup', authController.signup);
-router.post('/confirm-your-account', authController.confirmSignup);
+router.post('/confirm-signup', authController.confirmSignup);
 router.post('/resend-verification-email', authController.resendOtp);
 router.post('/login', authController.login);
 

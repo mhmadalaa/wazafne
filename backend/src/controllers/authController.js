@@ -87,6 +87,7 @@ exports.confirmSignup = catchAsync(async (req, res, next) => {
   const hashedOtp = hashOtp(req.body.otp);
 
   const user = await User.findOne({
+    email: req.body.email,
     otp: hashedOtp,
     otpExpires: { $gt: Date.now() },
     authenticated: false,
@@ -292,6 +293,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   const hashedOtp = hashOtp(req.body.otp);
 
   const user = await User.findOne({
+    email: req.body.email,
     otp: hashedOtp,
     otpExpires: { $gt: Date.now() },
   });
