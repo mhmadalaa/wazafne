@@ -2,6 +2,8 @@ const express = require('express');
 const morgan = require('morgan');
 
 const authRouter = require('./routers/authRoute');
+const employeeRouter = require('./routers/employeeRoute');
+const employerRouter = require('./routers/employerRoute');
 
 const app = express();
 
@@ -23,6 +25,8 @@ app.use(
 
 // APP ROUTERS
 app.use('/auth', authRouter);
+app.use('/employee', employeeRouter);
+// app.use('/employer', employerRouter);
 
 // NOT FOUND ROUTERS ERROR HANDLER
 app.use((err, req, res, next) => {

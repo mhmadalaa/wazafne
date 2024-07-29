@@ -30,7 +30,9 @@ const employeeSchema = new mongoose.Schema({
     required: [true, 'Please provide your National ID'],
     unique: true,
     validate: {
-      validator: isValid,
+      validator: function (val) {
+        return isValid && val.length === 14;
+      },
       message: 'Enter a valid Egyption National ID',
     },
   },
