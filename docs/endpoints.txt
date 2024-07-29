@@ -1,0 +1,25 @@
+/
+  home                                                  -- all posted jops, no filteration                        [all]
+
+  employer/
+    posted-jops                                         -- all posted that the employer posted                    [employer]  AI
+    profile                                             -- employer profile that contain his E-mail               [all]
+    suggesst-employees                                  -- suggesst employees based on some data                  [employer]  AI
+
+  jop/      
+    change-accept-state/jop_id                          -- change accept applications state [true or false]       [employer]
+    applicants/jop_id                                   -- list of employees that apply for the jop               [employer]
+    applicants/jop_id?employee=id&accept=true           -- list of employees that apply for the jop               [employer]
+    suggesst-applicants/jop_id                          -- with semantic search and match skill list employees    [employer]  AI
+    content/jop_id                                      -- jop detailed content, employer, state, etc.            [all]
+
+  jops/
+    add                                                 -- add new jop post                                       [employer]
+    apply                                               -- apply for a jop                                        [employee]
+    titles                                              -- all opened jops titles and ids to use it for search    [all]
+
+  employee/
+    profile                                             -- employee profile withe tech skills, level, bio         [all]
+    matched-jops                                        -- all jops that match employee skills, level, bio        [employee]  AI
+    applications                                        -- all jops that applied to it with his state ac, rej,.   [employee]
+    open-to-work                                        -- change employee state [true or false]                  [employee]
