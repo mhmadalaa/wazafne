@@ -10,8 +10,11 @@
   "author": "mohamed alaa",
   "license": "ISC",
   "dependencies": {
+    "egyptian-nationalid": "^1.0.0",
     "express": "^4.19.2",
-    "mongoose": "^8.5.1"
+    "mongoose": "^8.5.1",
+    "otp-generator": "^4.0.1",
+    "validator": "^13.12.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
