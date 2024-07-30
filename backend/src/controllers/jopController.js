@@ -90,13 +90,10 @@ exports.applyForJop = catchAsync(async (req, res, next) => {
   });
 });
 
-// list all applicatns that apply for a specific jop 
+// list all applicatns that apply for a specific jop
 exports.listJopApplicants = catchAsync(async (req, res, next) => {
   // validate if the logged in user is the employer who post the jop
-  const jop = await Jop.findById(req.params.id);
-  if (
-    !new mongoose.Types.ObjectId(jop.employer_id).equals(req.user.profile_id)
-  ) {
+  if (!isJopEmployer) {
     return next(
       new AppError(
         'You are not posted this jop, so you can not see the applicants!',
@@ -119,6 +116,92 @@ exports.listJopApplicants = catchAsync(async (req, res, next) => {
   });
 });
 
-// accept applicant
+// accept employee application
+exports.acceptApplication = catchAsync(async (req, res, next) => {
+  // validate if the logged in user is the employer who post the jop
+  if (!isJopEmployer) {
+    return next(
+      new AppError(
+        'You are not posted this jop, so you can not see the applicants!',
+        404,
+      ),
+    );
+  }
 
-// reject applicant
+  // change the jop-applicant status for the user to accepted
+  const jopApplicatioin = await JopApplicant.findOneAndUpdate(
+    {
+      employee_id: req.query.employee_id,
+      jop_id: req.query.jop_id,
+    },
+    { status: 'accepted' },
+    { new: true },
+  ).populate('employee_id');
+
+  // send acceptance email to the employee
+
+  res.status(200).json({
+    status: 'success',
+    message: 'accepted appplicant',
+  });
+});
+
+// reject employee application
+exports.rejectApplication = catchAsync(async (req, res, next) => {
+  // validate if the logged in user is the employer who post the jop
+  if (!isJopEmployer) {
+    return next(
+      new AppError(
+        'You are not posted this jop, so you can not see the applicants!',
+        404,
+      ),
+    );
+  }
+
+  // change the jop-applicant status for the user to rejected
+  const jopApplicatioin = await JopApplicant.findOneAndUpdate(
+    {
+      employee_id: req.query.employee_id,
+      jop_id: req.query.jop_id,
+    },
+    { status: 'rejected' },
+    { new: true },
+  ).populate('employee_id');
+
+  // send rejection email to the employee
+
+  res.status(200).json({
+    status: 'success',
+    message: 'rejected appplicant',
+  });
+});
+
+// enforce that the request have jop_id and employee_id query parameters
+// and they are a valid mongodb ids
+exports.enforceQueryParams = (req, res, next) => {
+  if (
+    req?.query &&
+    req.query.jop_id &&
+    mongoose.Types.ObjectId.isValid(req.query.jop_id) &&
+    req.query.employee_id &&
+    mongoose.Types.ObjectId.isValid(req.query.employee_id)
+  ) {
+    return next();
+  }
+
+  return next(
+    new AppError(
+      'Missing required query parameters, it should be in the form ?jop_id=[mongoID]&employee_id=[mongoID]',
+      400,
+    ),
+  );
+};
+
+const isJopEmployer = async (req) => {
+  // validate if the logged in user is the employer who post the jop
+  const jop = await Jop.findById(req.params.id);
+
+  return new mongoose.Types.ObjectId(jop.employer_id).equals(
+    req.user.profile_id,
+  );
+};

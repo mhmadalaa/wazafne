@@ -26,6 +26,22 @@ router
   .route('/applicants/:id')
   .get(authController.isEmployer, jopController.listJopApplicants);
 
+router
+  .route('/accept-application')
+  .patch(
+    authController.isEmployer,
+    jopController.enforceQueryParams,
+    jopController.acceptApplication,
+  );
+
+router
+  .route('/reject-application')
+  .patch(
+    authController.isEmployer,
+    jopController.enforceQueryParams,
+    jopController.rejectApplication,
+  );
+
 // get, post, patch, put, delete
 
 module.exports = router;
