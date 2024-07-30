@@ -4,6 +4,7 @@ const JopApplicant = require('./../models/JopApplicant');
 const sendEmail = require('./../utils/email');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+const APIFeatures = require('./../utils/apiFeatures');
 
 // create a jop only by the employers
 exports.createJop = catchAsync(async (req, res, next) => {
@@ -324,4 +325,36 @@ exports.appliedApplications = catchAsync(async (req, res, next) => {
   });
 });
 
+// TODO: mark posted-jops for employer, applied-jops for employees
+exports.allJops = catchAsync(async (req, res, next) => {
+  const features = new APIFeatures(Jop.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const jops = await features.query;
+
+  res.status(200).json({
+    status: 'success',
+    length: jops.length,
+    data: {
+      jops,
+    },
+  });
+});
+
 // jop titles-id's for general search
+exports.jopsTitles = catchAsync(async (req, res, next) => {
+  const jops = await Jop.find().select(
+    '-employer_id -body -accept_applications -createdAt -__v',
+  );
+
+  res.status(200).json({
+    status: 'success',
+    length: jops.length,
+    data: {
+      jops,
+    },
+  });
+});

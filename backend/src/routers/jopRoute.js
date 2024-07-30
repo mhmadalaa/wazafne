@@ -6,6 +6,10 @@ const router = express.Router();
 
 router.use(authController.isLogin);
 
+router.route('/all').get(jopController.allJops);
+
+router.route('/all-titles').get(jopController.jopsTitles);
+
 router
   .route('/create')
   .post(authController.isEmployer, jopController.createJop);
