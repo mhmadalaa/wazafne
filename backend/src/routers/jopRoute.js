@@ -22,6 +22,10 @@ router
   .route('/apply/:id')
   .post(authController.isEmployee, jopController.applyForJop);
 
+router
+  .route('/applicants/:id')
+  .get(authController.isEmployer, jopController.listJopApplicants);
+
 // get, post, patch, put, delete
 
 module.exports = router;

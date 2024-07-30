@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Jop = require('./../models/Jop');
 const JopApplicant = require('./../models/JopApplicant');
 const sendEmail = require('./../utils/email');
@@ -71,9 +72,11 @@ exports.applyForJop = catchAsync(async (req, res, next) => {
   }
 
   // check if jop still accept applications or not
-  const jop = await Jop.findById(req.params.id); 
+  const jop = await Jop.findById(req.params.id);
   if (jop.accept_applications === false) {
-    return next(new AppError('Sorry, this jop no longer accept applications.', 400));
+    return next(
+      new AppError('Sorry, this jop no longer accept applications.', 400),
+    );
   }
 
   // the state of user acceptence or not is by default `no-response`
@@ -87,7 +90,34 @@ exports.applyForJop = catchAsync(async (req, res, next) => {
   });
 });
 
-// list jop applicatns
+// list all applicatns that apply for a specific jop 
+exports.listJopApplicants = catchAsync(async (req, res, next) => {
+  // validate if the logged in user is the employer who post the jop
+  const jop = await Jop.findById(req.params.id);
+  if (
+    !new mongoose.Types.ObjectId(jop.employer_id).equals(req.user.profile_id)
+  ) {
+    return next(
+      new AppError(
+        'You are not posted this jop, so you can not see the applicants!',
+        404,
+      ),
+    );
+  }
+
+  // search in jop applicants and populate the employee profiles
+  const applicants = await JopApplicant.find({
+    jop_id: req.params.id,
+  }).populate('employee_id');
+
+  res.status(200).json({
+    status: 'success',
+    length: applicants.length,
+    data: {
+      applicants,
+    },
+  });
+});
 
 // accept applicant
 
