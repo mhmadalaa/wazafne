@@ -289,3 +289,39 @@ const sendRejectionEmail = async (employee, jop, employer) => {
     );
   }
 };
+
+// the jops that employee applied to it
+// there is filters to all cases [accepted, rejected, no-response, all] jops
+exports.appliedApplications = catchAsync(async (req, res, next) => {
+  let jops;
+  if (req.query.status === 'no-resposne') {
+    jops = await JopApplicant.find({
+      employee_id: req.user.profile_id,
+      status: 'no-resposne',
+    }).populate('jop_id');
+  } else if (req.query.status === 'accepted') {
+    jops = await JopApplicant.find({
+      employee_id: req.user.profile_id,
+      status: 'accepted',
+    }).populate('jop_id');
+  } else if (req.query.status === 'rejected') {
+    jops = await JopApplicant.find({
+      employee_id: req.user.profile_id,
+      status: 'rejected',
+    }).populate('jop_id');
+  } else {
+    jops = await JopApplicant.find({
+      employee_id: req.user.profile_id,
+    }).populate('jop_id');
+  }
+
+  res.status(200).json({
+    status: 'success',
+    length: jops.length,
+    data: {
+      jops,
+    },
+  });
+});
+
+// jop titles-id's for general search

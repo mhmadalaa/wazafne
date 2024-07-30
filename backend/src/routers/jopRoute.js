@@ -42,6 +42,10 @@ router
     jopController.rejectApplication,
   );
 
+router
+  .route('/applied-applications')
+  .get(authController.isEmployee, jopController.appliedApplications);
+
 // get, post, patch, put, delete
 
 module.exports = router;
