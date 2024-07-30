@@ -56,8 +56,8 @@ exports.updateEmployeeProfile = catchAsync(async (req, res, next) => {
   if (req.body.experience_level) {
     update.experience_level = req.body.experience_level;
   }
-  if (req.body.open_to_work) {
-    update.open_to_work = req.body.open_to_work;
+  if (req.body.open_to_work === true || req.body.open_to_work === false) {
+    update.open_to_work = req.body.open_to_work === true;
   }
 
   const employeeProfile = await Employee.findByIdAndUpdate(

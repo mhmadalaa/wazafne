@@ -8,7 +8,7 @@ router.use(authController.isLogin);
 router.use(authController.isEmployee);
 
 router.patch(
-  '/update-employee-profile',
+  '/update-profile',
   employeeController.updateEmployeeProfile,
 );
 
