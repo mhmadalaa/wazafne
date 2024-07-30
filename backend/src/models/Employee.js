@@ -64,6 +64,10 @@ const employeeSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  profile_views: {
+    type: Number,
+    default: 0,
+  },
   createdAt: Date,
 });
 

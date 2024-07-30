@@ -88,3 +88,21 @@ exports.employeeProfile = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.addProfileView = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  const employeeProfile = await Employee.findByIdAndUpdate(
+    user.profile_id,
+    {
+      $inc: { profile_views: 1 },
+    },
+    { new: true },
+  );
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      employeeProfile,
+    },
+  });
+});
