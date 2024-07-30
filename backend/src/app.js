@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const authRouter = require('./routers/authRoute');
 const employeeRouter = require('./routers/employeeRoute');
 const employerRouter = require('./routers/employerRoute');
+const jopRouter = require('./routers/jopRoute');
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use(
 app.use('/auth', authRouter);
 app.use('/employee', employeeRouter);
 app.use('/employer', employerRouter);
+app.use('/jop', jopRouter);
 
 // NOT FOUND ROUTERS ERROR HANDLER
 app.use((err, req, res, next) => {
