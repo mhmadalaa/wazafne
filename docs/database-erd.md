@@ -1,1 +1,1 @@
-![db-erd](https://github.com/user-attachments/assets/8fccc00e-0b96-4583-8e2f-6fc38850c449)
+![db-erd](https://github.com/user-attachments/assets/062cc3d4-4765-4fc2-a66a-4b46990c76d4)
