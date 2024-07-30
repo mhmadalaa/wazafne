@@ -325,7 +325,7 @@ exports.appliedApplications = catchAsync(async (req, res, next) => {
   });
 });
 
-// TODO: mark posted-jops for employer, applied-jops for employees
+// all jops for the home page
 exports.allJops = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(Jop.find(), req.query)
     .filter()
