@@ -136,9 +136,32 @@ exports.acceptApplication = catchAsync(async (req, res, next) => {
     },
     { status: 'accepted' },
     { new: true },
-  ).populate('employee_id');
+  )
+    .populate('employee_id')
+    .populate({
+      path: 'jop_id',
+      populate: {
+        path: 'employer_id',
+        model: 'Employer',
+      },
+    });
 
-  // send acceptance email to the employee
+  // construct the data objects to sent the email
+  const employee = {
+    name: jopApplicatioin.employee_id.name,
+    email: jopApplicatioin.employee_id.contact_email,
+  };
+  const jop = {
+    title: jopApplicatioin.jop_id.title,
+    body: jopApplicatioin.jop_id.body,
+  };
+  const employer = {
+    name: jopApplicatioin.jop_id.employer_id.name,
+    email: jopApplicatioin.jop_id.employer_id.contact_email,
+  };
+
+  // send acceptance email to the lemployee
+  sendAcceptanceEmail(employee, jop, employer);
 
   res.status(200).json({
     status: 'success',
@@ -159,6 +182,7 @@ exports.rejectApplication = catchAsync(async (req, res, next) => {
   }
 
   // change the jop-applicant status for the user to rejected
+  // and extract employee, employer, jop data to use it in email
   const jopApplicatioin = await JopApplicant.findOneAndUpdate(
     {
       employee_id: req.query.employee_id,
@@ -166,9 +190,32 @@ exports.rejectApplication = catchAsync(async (req, res, next) => {
     },
     { status: 'rejected' },
     { new: true },
-  ).populate('employee_id');
+  )
+    .populate('employee_id')
+    .populate({
+      path: 'jop_id',
+      populate: {
+        path: 'employer_id',
+        model: 'Employer',
+      },
+    });
+
+  // construct the data objects to sent the email
+  const employee = {
+    name: jopApplicatioin.employee_id.name,
+    email: jopApplicatioin.employee_id.contact_email,
+  };
+  const jop = {
+    title: jopApplicatioin.jop_id.title,
+    body: jopApplicatioin.jop_id.body,
+  };
+  const employer = {
+    name: jopApplicatioin.jop_id.employer_id.name,
+    email: jopApplicatioin.jop_id.employer_id.contact_email,
+  };
 
   // send rejection email to the employee
+  sendRejectionEmail(employee, jop, employer);
 
   res.status(200).json({
     status: 'success',
@@ -197,11 +244,48 @@ exports.enforceQueryParams = (req, res, next) => {
   );
 };
 
+// validate if the logged in user is the employe◘r who post the jop
 const isJopEmployer = async (req) => {
-  // validate if the logged in user is the employer who post the jop
   const jop = await Jop.findById(req.params.id);
 
   return new mongoose.Types.ObjectId(jop.employer_id).equals(
     req.user.profile_id,
   );
+};
+
+// send application acceptance email to the employee
+const sendAcceptanceEmail = async (employee, jop, employer) => {
+  try {
+    await sendEmail({
+      email: employee.email,
+      subject: 'Acceptance Email',
+      message: `Congratulations, ${employee.name} \nYou have been accepted in jop \n${jop.title} \n${jop.body} 
+      \nposted by the Employer: \n${employer.name} \nYou can reach the employer via his email ${employer.email}\n\nWazafne Team.`,
+    });
+
+    console.log(`An acceptance email sent to user ${employee.email}`);
+  } catch (err) {
+    console.error(
+      `There is an error while send acceptance email to user ${employee.email} \nError: ${err}`,
+    );
+  }
+};
+
+// send application rejection email to the employee
+const sendRejectionEmail = async (employee, jop, employer) => {
+  try {
+    await sendEmail({
+      email: employee.email,
+      subject: 'Rejection Email',
+      message: `Hello  ${employee.name} \nWe are sory to infrom you that your application at 
+      \n${jop.title} \n ${jop.body} 
+      \nPosted by the Employer: ${employer.name} ${employer.email}, \nHas been rejected.\n\n\n Wazafne Team.`,
+    });
+
+    console.log(`A rejection email sent to employee ${employee.email}`);
+  } catch (err) {
+    console.error(
+      `There is an error while send rejection email to user ${employee.email} \nError: ${err}`,
+    );
+  }
 };
