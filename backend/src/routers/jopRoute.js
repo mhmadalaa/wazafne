@@ -14,6 +14,10 @@ router
   .route('/edit/:id')
   .patch(authController.isEmployer, jopController.editJop);
 
+router
+  .route('/created-jops')
+  .get(authController.isEmployer, jopController.listCreatedJops);
+
 // get, post, patch, put, delete
 
 module.exports = router;
