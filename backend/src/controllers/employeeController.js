@@ -4,6 +4,7 @@ const sendEmail = require('./../utils/email');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 
+// update employee profile including add or remove list of programming languages
 exports.updateEmployeeProfile = catchAsync(async (req, res, next) => {
   if (req.body.email || req.body.password || req.body.passwordConfirm) {
     return res.status(401).json({
@@ -89,6 +90,7 @@ exports.employeeProfile = catchAsync(async (req, res, next) => {
   });
 });
 
+// increment profile views by 1 with each view
 exports.addProfileView = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id);
   const employeeProfile = await Employee.findByIdAndUpdate(
@@ -103,6 +105,21 @@ exports.addProfileView = catchAsync(async (req, res, next) => {
     status: 'success',
     data: {
       employeeProfile,
+    },
+  });
+});
+
+// employees names list, for general search in the application
+exports.allEmployees = catchAsync(async (req, res, next) => {
+  const employees = await Employee.find().select(
+    '-user_id -contact_email -nationalID -city -bio -programming_languages -experience_level -open_to_work -createdAt -__v -profile_views',
+  );
+
+  res.status(200).json({
+    status: 'success',
+    length: employees.length,
+    data: {
+      employees,
     },
   });
 });

@@ -7,10 +7,13 @@ const router = express.Router();
 router.use(authController.isLogin);
 router.use(authController.isEmployee);
 
-router.patch('/update-profile', employeeController.updateEmployeeProfile);
+router
+  .route('/profile')
+  .get(employeeController.employeeProfile)
+  .patch(employeeController.updateEmployeeProfile);
 
-router.get('/profile', employeeController.employeeProfile);
+router.patch('/profile-view', employeeController.addProfileView);
 
-router.patch('/add-profile-view', employeeController.addProfileView);
+router.get('/profiles-names', employeeController.allEmployees);
 
 module.exports = router;
