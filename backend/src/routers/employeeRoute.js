@@ -6,7 +6,13 @@ const router = express.Router();
 
 router.use(authController.isLogin);
 router.use(authController.isEmployee);
-router.patch('/update-employee-profile', employeeController.updateEmployeeProfile);
+
+router.patch(
+  '/update-employee-profile',
+  employeeController.updateEmployeeProfile,
+);
+
+router.get('/profile', employeeController.employeeProfile);
 
 // get, post, patch, put, delete
 

@@ -76,3 +76,15 @@ exports.updateEmployeeProfile = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.employeeProfile = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  const employeeProfile = await Employee.findById(user.profile_id);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      employeeProfile,
+    },
+  });
+});
