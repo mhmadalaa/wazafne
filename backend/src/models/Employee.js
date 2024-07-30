@@ -24,7 +24,7 @@ const employeeSchema = new mongoose.Schema({
       message: 'Enter a valid email',
     },
   },
-  // FIXME: it's validate only egyption national ids
+  // It's validate only egyption national ids
   nationalID: {
     type: String,
     required: [true, 'Please provide your National ID'],

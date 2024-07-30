@@ -1,4 +1,5 @@
 const Jop = require('./../models/Jop');
+const JopApplicant = require('./../models/JopApplicant');
 const sendEmail = require('./../utils/email');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
@@ -57,3 +58,37 @@ exports.listCreatedJops = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+// employee apply for a jop
+exports.applyForJop = catchAsync(async (req, res, next) => {
+  // check if applied before
+  const application = await JopApplicant.findOne({
+    jop_id: req.params.id,
+    employee_id: req.user.profile_id,
+  });
+  if (application) {
+    return next(new AppError('you already applied for this jop.', 400));
+  }
+
+  // check if jop still accept applications or not
+  const jop = await Jop.findById(req.params.id); 
+  if (jop.accept_applications === false) {
+    return next(new AppError('Sorry, this jop no longer accept applications.', 400));
+  }
+
+  // the state of user acceptence or not is by default `no-response`
+  await JopApplicant.create({
+    jop_id: req.params.id,
+    employee_id: req.user.profile_id,
+  });
+
+  res.status(200).json({
+    status: 'success',
+  });
+});
+
+// list jop applicatns
+
+// accept applicant
+
+// reject applicant

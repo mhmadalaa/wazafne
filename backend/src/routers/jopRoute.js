@@ -18,6 +18,10 @@ router
   .route('/created-jops')
   .get(authController.isEmployer, jopController.listCreatedJops);
 
+router
+  .route('/apply/:id')
+  .post(authController.isEmployee, jopController.applyForJop);
+
 // get, post, patch, put, delete
 
 module.exports = router;
