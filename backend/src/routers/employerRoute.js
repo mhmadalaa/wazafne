@@ -7,13 +7,10 @@ const router = express.Router();
 router.use(authController.isLogin);
 router.use(authController.isEmployer);
 
-router.patch(
-  '/update-profile',
-  employerController.updateEmployerProfile,
-);
+router.patch('/update-profile', employerController.updateEmployerProfile);
 
 router.get('/profile', employerController.employerProfile);
 
-// get, post, patch, put, delete
+router.get('/filter-employees', employerController.searchForEmployees);
 
 module.exports = router;
