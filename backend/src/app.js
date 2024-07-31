@@ -10,6 +10,7 @@ const app = express();
 
 // BACKGROUND TASKS
 require('./background_tasks/nonVerifiedUsers');
+require('./background_tasks/employeesMatchedJops');
 
 // to accept json data in requests
 app.use(express.json());
