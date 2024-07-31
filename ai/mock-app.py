@@ -56,7 +56,8 @@ def delete_employee():
 @app.route("/find_matched_employees", methods=["POST"])
 def find_matched_employees():
     data = request.json
-    job_text = data["job_text"]
+    job_text = data.get("job_text")
+    print(job_text)
     # top_k = data.get("top_k", 10)
     # job_vector = model.encode(job_text).tolist()
     # results = index.query(job_vector, top_k=top_k)
