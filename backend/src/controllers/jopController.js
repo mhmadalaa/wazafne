@@ -1,10 +1,13 @@
 const mongoose = require('mongoose');
+const axios = require('axios');
 const Jop = require('./../models/Jop');
+const JopMatch = require('./../models/JopMatch');
 const JopApplicant = require('./../models/JopApplicant');
 const sendEmail = require('./../utils/email');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const APIFeatures = require('./../utils/apiFeatures');
+const AI_API = process.env.AI_API;
 
 // create a jop only by the employers
 exports.createJop = catchAsync(async (req, res, next) => {
@@ -14,6 +17,55 @@ exports.createJop = catchAsync(async (req, res, next) => {
     employer_id: req.user.profile_id,
     createdAt: Date.now(),
   });
+
+  // construct search arguments object
+  const searchArguments = {
+    title: req.body.title,
+    body: req.body.body,
+  };
+
+  // stringfy the search arguments object. and send it to ai model
+  axios
+    .post(`${AI_API}/find_matched_employees`, {
+      data: {
+        job_text: JSON.stringify(searchArguments),
+      },
+    })
+    .then(async (response) => {
+      // response.data -- list of employee [id]
+      try {
+        const employee_ids = response.data.matched_employee_ids;
+
+        for (let i = 0; i < employee_ids.length; ++i) {
+          // add jops to employees that match it
+          const jop_match = await JopMatch.create({
+            jop_id: jop._id,
+            employee_id: employee_ids[i],
+            createdAt: Date.now(),
+          });
+
+          if (!jop_match) {
+            console.error(
+              `✗ An error while create jop match recored in database for employee: ${employee_ids[i]} and  jop: ${jop._id}!`,
+            );
+          } else {
+            console.log(
+              `Jop: ${jop._id} has been added to employee ${employee_ids[i]} accourding to ai-match`,
+            );
+          }
+        }
+      } catch (error) {
+        console.error(
+          '✗ An error while saving the jops that match employees profiles!',
+          error,
+        );
+      }
+    })
+    .catch(function (error) {
+      console.error(
+        'can not connect to ai-api when jop created to search the matched employees',
+      );
+    });
 
   res.status(200).json({
     status: 'success',
