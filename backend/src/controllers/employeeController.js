@@ -4,6 +4,7 @@ const User = require('./../models/User');
 const sendEmail = require('./../utils/email');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+const JopMatch = require('../models/JopMatch');
 
 const AI_API = process.env.AI_API;
 
@@ -198,6 +199,21 @@ exports.allEmployees = catchAsync(async (req, res, next) => {
     length: employees.length,
     data: {
       employees,
+    },
+  });
+});
+
+// list matched jops for logged in employee based on ai-model semantic search
+exports.matchedJops = catchAsync(async (req, res, next) => {
+  const matched_jops = await JopMatch.find({
+    employee_id: req.user.profile_id,
+  }).populate('jop_id');
+
+  res.status(200).json({
+    status: 'success',
+    length: matched_jops.length,
+    data: {
+      matched_jops,
     },
   });
 });

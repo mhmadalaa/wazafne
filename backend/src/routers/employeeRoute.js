@@ -16,4 +16,6 @@ router.patch('/profile-view', employeeController.addProfileView);
 
 router.get('/profiles-names', employeeController.allEmployees);
 
+router.get('/matched-jops', employeeController.matchedJops);
+
 module.exports = router;
