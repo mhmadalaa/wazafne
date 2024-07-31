@@ -146,6 +146,7 @@ exports.confirmSignup = catchAsync(async (req, res, next) => {
             employee_id: employee._id,
             employee_profile: JSON.stringify({
               bio: req.body.bio,
+              city: req.body.city,
               programming_languages: req.body.programming_languages,
               experience_level: req.body.experience_level,
             }),
