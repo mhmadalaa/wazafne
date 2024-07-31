@@ -1,8 +1,11 @@
+const axios = require('axios');
 const Employee = require('./../models/Employee');
 const User = require('./../models/User');
 const sendEmail = require('./../utils/email');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+
+const AI_API = process.env.AI_API;
 
 // update employee profile including add or remove list of programming languages
 exports.updateEmployeeProfile = catchAsync(async (req, res, next) => {
@@ -59,6 +62,27 @@ exports.updateEmployeeProfile = catchAsync(async (req, res, next) => {
   }
   if (req.body.open_to_work === true || req.body.open_to_work === false) {
     update.open_to_work = req.body.open_to_work === true;
+
+    if (req.body.open_to_work === false) {
+      // send employee to ai model to remove it from vector database
+      // because employee mark that he is not open to work
+      axios
+        .delete(`${AI_API}/delete_employee`, {
+          data: {
+            employee_id: user.profile_id,
+          },
+        })
+        .then((response) => {
+          console.log(
+            `Employee: ${user.profile_id} deleted from ai vector database due to employee not open to work status`,
+          );
+        })
+        .catch(function (error) {
+          console.error(
+            'can not connect to ai-api to remove employee from ai vector database in case of change not open to work update',
+          );
+        });
+    }
   }
 
   const employeeProfile = await Employee.findByIdAndUpdate(
