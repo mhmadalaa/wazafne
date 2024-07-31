@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 
-from sentence_transformers import SentenceTransformer
-import pinecone
+# from sentence_transformers import SentenceTransformer
+# import pinecone
 import os
 
 load_dotenv()
@@ -11,14 +11,14 @@ load_dotenv()
 app = Flask(__name__)
 
 # Initialize the Sentence-BERT model
-model = SentenceTransformer("all-MiniLM-L6-v2")
+# model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# Initialize Pinecone
-pinecone.init(api_key=os.getenv("PINECONE_API"))  # Pinecone cloud vector database
-index_name = "job_applications"
-if index_name not in pinecone.list_indexes():
-    pinecone.create_index(index_name)
-index = pinecone.Index(index_name)
+# # Initialize Pinecone
+# pinecone.init(api_key=os.getenv("PINECONE_API"))  # Pinecone cloud vector database
+# index_name = "job_applications"
+# if index_name not in pinecone.list_indexes():
+#     pinecone.create_index(index_name)
+# index = pinecone.Index(index_name)
 
 
 @app.route("/add_employee", methods=["POST"])
@@ -27,8 +27,8 @@ def add_employee():
     employee_id = data["employee_id"]
     employee_bio = data["employee_bio"]
     print(employee_bio, employee_id)
-    employee_vector = model.encode(employee_bio).tolist()
-    index.upsert([(employee_id, employee_vector)])
+    # employee_vector = model.encode(employee_bio).tolist()
+    # index.upsert([(employee_id, employee_vector)])
     return jsonify({"message": f"Added employee with ID: {employee_id}"}), 200
 
 
@@ -48,7 +48,8 @@ def delete_employee():
             ),
             200,
         )
-    except pinecone.errors.ResourceNotFoundError:
+    # except pinecone.errors.ResourceNotFoundError:
+    except:
         return jsonify({"error": f"Employee with ID: {employee_id} not found"}), 404
 
 
@@ -56,10 +57,16 @@ def delete_employee():
 def find_matched_employees():
     data = request.json
     job_text = data["job_text"]
-    top_k = data.get("top_k", 10)
-    job_vector = model.encode(job_text).tolist()
-    results = index.query(job_vector, top_k=top_k)
-    matched_employee_ids = [res["id"] for res in results["matches"]]
+    # top_k = data.get("top_k", 10)
+    # job_vector = model.encode(job_text).tolist()
+    # results = index.query(job_vector, top_k=top_k)
+    # matched_employee_ids = [res["id"] for res in results["matches"]]
+    matched_employee_ids = [
+        "66a80e242678bf6612266094",
+        "66a80e242678bf6612266094",
+        "66a80e242678bf6612266094",
+        "66a80e242678bf6612266094",
+    ]
     return jsonify({"matched_employee_ids": matched_employee_ids}), 200
 
 
