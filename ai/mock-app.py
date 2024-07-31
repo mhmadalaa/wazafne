@@ -23,11 +23,11 @@ app = Flask(__name__)
 
 @app.route("/add_employee", methods=["POST"])
 def add_employee():
-    data = request.json
-    employee_id = data["employee_id"]
-    employee_bio = data["employee_bio"]
-    print(employee_bio, employee_id)
-    # employee_vector = model.encode(employee_bio).tolist()
+    data = request.get_json()
+    employee_id = data.get("employee_id")
+    employee_profile = data.get("employee_profile")
+    print(employee_profile, employee_id)
+    # employee_vector = model.encode(employee_profile).tolist()
     # index.upsert([(employee_id, employee_vector)])
     return jsonify({"message": f"Added employee with ID: {employee_id}"}), 200
 
@@ -55,9 +55,9 @@ def delete_employee():
 
 @app.route("/find_matched_employees", methods=["POST"])
 def find_matched_employees():
-    data = request.json
+    data = request.get_json()
     job_text = data.get("job_text")
-    print(job_text)
+    print(job_text) # FIXME: does the data arrive to ai really??
     # top_k = data.get("top_k", 10)
     # job_vector = model.encode(job_text).tolist()
     # results = index.query(job_vector, top_k=top_k)
