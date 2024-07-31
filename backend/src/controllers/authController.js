@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
+const axios = require('axios');
 
 const User = require('./../models/User');
 const Employer = require('./../models/Employer');
@@ -8,6 +9,8 @@ const sendEmail = require('./../utils/email');
 const hashOtp = require('./../utils/hashOtp');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+
+const AI_API = process.env.AI_API;
 
 // create and send jwt-token in login, confirm-signup, change account email or password
 const createSendToken = (res, status, user) => {
@@ -134,6 +137,30 @@ exports.confirmSignup = catchAsync(async (req, res, next) => {
 
     if (employee) {
       user.profile_id = employee._id;
+
+      // send employee to ai model to added it in vector database
+      // for upcoming semantic search for jop matches, etc.
+      axios
+        .post(`${AI_API}/add_employee`, {
+          data: {
+            employee_id: employee._id,
+            employee_profile: JSON.stringify({
+              bio: req.body.bio,
+              programming_languages: req.body.programming_languages,
+              experience_level: req.body.experience_level,
+            }),
+          },
+        })
+        .then((response) => {
+          console.log(
+            `Employee: ${employee._id} added to ai model vector database`,
+          );
+        })
+        .catch(function (error) {
+          console.error(
+            'can not connect to ai-api to add employee in ai vector database',
+          );
+        });
     } else {
       return res.status(406).json({
         status: 'error',
@@ -176,7 +203,7 @@ exports.resendOtp = catchAsync(async (req, res, next) => {
   sendEmailWithOtp(user, confirmOtp, res);
 });
 
-// login the user with his email and password, and send back 
+// login the user with his email and password, and send back
 // jwt-token to use in the upcoming login until that token expires.
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -219,8 +246,8 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(res, 200, user);
 });
 
-// check if user is login or not via jwt-token, 
-// and if login extract user data and put it in the request 
+// check if user is login or not via jwt-token,
+// and if login extract user data and put it in the request
 // for the upcoming actions in the application
 exports.isLogin = catchAsync(async (req, res, next) => {
   if (
@@ -287,7 +314,7 @@ exports.forgetPassword = async (req, res, next) => {
   sendEmailWithOtp(user, resetOtp, res);
 };
 
-// after user request of forgetting his password, 
+// after user request of forgetting his password,
 // will redirect to this endpoint to reset his password with new one
 exports.resetPassword = catchAsync(async (req, res, next) => {
   const hashedOtp = hashOtp(req.body.otp);
