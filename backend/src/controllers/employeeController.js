@@ -1,7 +1,6 @@
 const axios = require('axios');
 const Employee = require('./../models/Employee');
 const User = require('./../models/User');
-const sendEmail = require('./../utils/email');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const JopMatch = require('../models/JopMatch');
@@ -63,29 +62,9 @@ exports.updateEmployeeProfile = catchAsync(async (req, res, next) => {
   }
   if (req.body.open_to_work === true || req.body.open_to_work === false) {
     update.open_to_work = req.body.open_to_work === true;
-
-    if (req.body.open_to_work === false) {
-      // send employee to ai model to remove it from vector database
-      // because employee mark that he is not open to work
-      axios
-        .delete(`${AI_API}/delete_employee`, {
-          data: {
-            employee_id: user.profile_id,
-          },
-        })
-        .then((response) => {
-          console.log(
-            `Employee: ${user.profile_id} deleted from ai vector database due to employee not open to work status`,
-          );
-        })
-        .catch(function (error) {
-          console.error(
-            'can not connect to ai-api to remove employee from ai vector database in case of change not open to work update',
-          );
-        });
-    }
   }
 
+  // update the employee profile
   const employeeProfile = await Employee.findByIdAndUpdate(
     user.profile_id,
     update,
@@ -95,58 +74,30 @@ exports.updateEmployeeProfile = catchAsync(async (req, res, next) => {
     },
   );
 
-  // keep vector database match with profile updates
-  if (
-    req.body.bio ||
-    req.body.city ||
-    req.body.experience_level ||
-    req.body.add_programming_languages ||
-    req.body.remove_programming_languages
-  ) {
-    // delte the employee from ai vectordb and added it with the updated data
-    // send employee to ai model to remove it from vector database
-    // because employee mark that he is not open to work
-    axios
-      .delete(`${AI_API}/delete_employee`, {
-        data: {
-          employee_id: user.profile_id,
-        },
-      })
-      .then((response) => {
-        console.log(
-          `Employee: ${user.profile_id} deleted from ai vector database due to employee not open to work status`,
-        );
-      })
-      .catch(function (error) {
-        console.error(
-          'can not connect to ai-api to remove employee from ai vector database in case of change not open to work update',
-        );
-      });
+  // after updated the employee profile
+  // update the ai-vector-database with the new profile data
+  // to be updated in the semantic search operations
 
-    // send employee to ai model to added it in vector database
-    // to be updated with employee profile changes for upcoming semantic search for jop matches, etc.
-    axios
-      .post(`${AI_API}/add_employee`, {
-        data: {
-          employee_id: user.profile_id,
-          employee_profile: JSON.stringify({
-            bio: employeeProfile.bio,
-            city: employeeProfile.city,
-            programming_languages: employeeProfile.programming_languages,
-            experience_level: employeeProfile.experience_level,
-          }),
-        },
-      })
-      .then((response) => {
-        console.log(
-          `Employee: ${user.profile_id} added to ai model vector database while updating employee profile`,
-        );
-      })
-      .catch(function (error) {
-        console.error(
-          'can not connect to ai-api to add employee in ai vector database while updating employee profile',
-        );
-      });
+  if (employeeProfile.open_to_work === true && req.body.open_to_work === true) {
+    // when user say he is open-to-work, that mean he is deleted from ai-vector-db.
+    // so, we just need to add him.
+    addToVectorDB(employeeProfile);
+  } else if (
+    employeeProfile.open_to_work === false &&
+    req.body.open_to_work === false
+  ) {
+    // when user say he is not-open-to-work, we just need to delete him from vector-db.
+    deleteFromVectorDB(employeeProfile);
+  } else if (
+    employeeProfile.open_to_work === true &&
+    req.body.open_to_work === undefined
+  ) {
+    // when user is open-to-work, but he is not update the open-to-work status in this update,
+    // that mean, he is open-to-work from a while, and his profile is saved in vector-db already.
+    // so, to update his vector-embedding according the updated profile data,
+    // we will delete the old embedding, and add the new data.
+    deleteFromVectorDB(employeeProfile);
+    addToVectorDB(employeeProfile);
   }
 
   res.status(200).json({
@@ -217,3 +168,45 @@ exports.matchedJops = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+const deleteFromVectorDB = (employee) => {
+  axios
+    .delete(`${AI_API}/delete_employee`, {
+      data: {
+        employee_id: employee._id,
+      },
+    })
+    .then((response) => {
+      console.log(`Employee: ${employee._id} deleted from ai vector database`);
+    })
+    .catch(function (error) {
+      console.error(
+        'can not connect to ai-api to remove employee from ai vector database',
+      );
+    });
+};
+
+const addToVectorDB = (employee) => {
+  axios
+    .post(`${AI_API}/add_employee`, {
+      data: {
+        employee_id: employee._id,
+        employee_profile: JSON.stringify({
+          bio: employee.bio,
+          city: employee.city,
+          programming_languages: employee.programming_languages,
+          experience_level: employee.experience_level,
+        }),
+      },
+    })
+    .then((response) => {
+      console.log(
+        `Employee: ${employee._id} added to ai model vector database while updating employee profile`,
+      );
+    })
+    .catch(function (error) {
+      console.error(
+        'can not connect to ai-api to add employee in ai vector database while updating employee profile',
+      );
+    });
+};
